@@ -1,0 +1,19 @@
+[workspace]
+resolver = "2"
+members = [ 
+    "ndb-core",
+    "ndb-oui", 
+    "ndb-tcp-service", 
+    "ndb-udp-service", 
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+authors = ["shellrow <shellrow@fortnium.com>"]
+
+[workspace.dependencies]
+ndb-core = { path = "ndb-core" }
+serde = { version = "1" }
+csv = { version = "1" }
+criterion = { version = "0.5" }

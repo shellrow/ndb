@@ -1,0 +1,25 @@
+[package]
+name = "ndb-tcp-service"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+description = "TCP service database with lookup interface."
+repository = "https://github.com/shellrow/ndb"
+readme = "README.md"
+license = "MIT"
+
+[dependencies]
+ndb-core = { workspace = true }
+serde = { workspace = true, features = ["derive"] }
+csv = { workspace = true }
+
+[dev-dependencies]
+criterion = { workspace = true }
+
+[features]
+default = ["bundled"]
+bundled = []
+
+[[bench]]
+name = "tcp_lookup"
+harness = false

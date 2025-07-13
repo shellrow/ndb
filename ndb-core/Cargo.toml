@@ -1,0 +1,12 @@
+[package]
+name = "ndb-core"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+description = "Internal crate for ndb ecosystem"
+repository = "https://github.com/shellrow/ndb"
+readme = "README.md"
+license = "MIT"
+
+[dependencies]
+serde = { workspace = true }
