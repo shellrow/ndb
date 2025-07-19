@@ -1,10 +1,11 @@
 use std::collections::HashMap;
 use std::io::{Cursor, Read};
 use serde::{Deserialize, Serialize};
+use rangemap::RangeInclusiveMap;
 
 pub use netdev::MacAddr;
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq,Serialize, Deserialize)]
 pub struct OuiEntry {
     pub mac_prefix: String,
     pub vendor: String,
@@ -13,17 +14,28 @@ pub struct OuiEntry {
 
 pub struct OuiDb {
     inner: HashMap<String, OuiEntry>,
+    inner_range: RangeInclusiveMap<u64, OuiEntry>,
 }
 
 impl OuiDb {
     pub fn from_csv<R: Read>(reader: R) -> Result<Self, csv::Error> {
         let mut rdr = csv::Reader::from_reader(reader);
         let mut map = HashMap::new();
+        let mut range_map: RangeInclusiveMap<u64, OuiEntry> = RangeInclusiveMap::new();
         for result in rdr.deserialize::<OuiEntry>() {
             let entry = result?;
-            map.insert(entry.mac_prefix.clone(), entry);
+            if let Some((prefix, bits)) = parse_mac_prefix_cidr(&entry.mac_prefix) {
+                let start = mac_to_u64(prefix) & (!0u64 << (48 - bits));
+                let end = start | ((1u64 << (48 - bits)) - 1);
+                range_map.insert(start..=end, entry.clone());
+            } else {
+                map.insert(entry.mac_prefix.clone(), entry);
+            }
         }
-        Ok(Self { inner: map })
+        Ok(Self { 
+            inner: map,
+            inner_range: range_map, 
+        }) 
     }
 
     #[cfg(feature = "bundled")]
@@ -50,20 +62,15 @@ impl OuiDb {
     pub fn lookup_mac(&self, mac: MacAddr) -> Option<&OuiEntry> {
         let octets = mac.octets();
 
-        // Check for exact prefix match
-        let key = format!("{:02X}:{:02X}:{:02X}", octets[0], octets[1], octets[2]);
-        if let Some(entry) = self.inner.get(&key) {
+        // Range (CIDR) match
+        let mac_u64 = mac_to_u64(octets);
+        if let Some(entry) = self.inner_range.get(&mac_u64) {
             return Some(entry);
         }
-        // Check for CIDR notation
-        for (key, entry) in self.inner.iter() {
-            if let Some((prefix, bits)) = parse_mac_prefix_cidr(key) {
-                if bitwise_eq(octets, prefix, bits) {
-                    return Some(entry);
-                }
-            }
-        }
-        None
+
+        // Exact match
+        let key = format!("{:02X}:{:02X}:{:02X}", octets[0], octets[1], octets[2]);
+        self.inner.get(&key)
     }
 }
 
@@ -77,20 +84,13 @@ fn parse_mac_prefix_cidr(s: &str) -> Option<([u8; 6], u8)> {
     Some((mac.octets(), bits))
 }
 
-fn bitwise_eq(mac: [u8; 6], prefix: [u8; 6], prefix_len: u8) -> bool {
-    let bytes = (prefix_len / 8) as usize;
-    let bits = prefix_len % 8;
-
-    if mac[..bytes] != prefix[..bytes] {
-        return false;
-    }
-
-    if bits > 0 {
-        let mask = 0xFF << (8 - bits);
-        mac[bytes] & mask == prefix[bytes] & mask
-    } else {
-        true
-    }
+fn mac_to_u64(mac: [u8; 6]) -> u64 {
+    ((mac[0] as u64) << 40)
+        | ((mac[1] as u64) << 32)
+        | ((mac[2] as u64) << 24)
+        | ((mac[3] as u64) << 16)
+        | ((mac[4] as u64) << 8)
+        | (mac[5] as u64)
 }
 
 #[cfg(test)]
