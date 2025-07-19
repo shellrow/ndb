@@ -13,7 +13,7 @@ edition = "2021"
 authors = ["shellrow <shellrow@foctal.com>"]
 
 [workspace.dependencies]
-ndb-core = { path = "ndb-core" }
+ndb-core = { path = "ndb-core", version = "0.1.0" }
 serde = { version = "1" }
 csv = { version = "1" }
 criterion = { version = "0.5" }
