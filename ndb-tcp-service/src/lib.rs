@@ -3,6 +3,7 @@ use std::io::{Cursor, Read};
 use serde::{Deserialize, Serialize};
 use ndb_core::utils::serde::de_u8_to_bool;
 
+/// Represents a single TCP service entry
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct TcpServiceEntry {
     pub port: u16,
@@ -14,6 +15,7 @@ pub struct TcpServiceEntry {
     pub common: bool,
 }
 
+/// Represents the TCP service database
 pub struct TcpServiceDb {
     inner: HashMap<u16, TcpServiceEntry>,
 }
@@ -37,22 +39,27 @@ impl TcpServiceDb {
         Self::from_csv(Cursor::new(CSV_DATA)).expect("Failed to load bundled tcp-services.csv")
     }
 
+    /// Lookup a TCP service name by port
     pub fn get_name(&self, port: u16) -> Option<&str> {
         self.inner.get(&port).map(|e| e.name.as_str())
     }
 
+    /// Lookup a TCP service entry by port
     pub fn get(&self, port: u16) -> Option<&TcpServiceEntry> {
         self.inner.get(&port)
     }
     
+    /// Get all TCP service entries as an iterator
     pub fn all(&self) -> impl Iterator<Item = (&u16, &TcpServiceEntry)> {
         self.inner.iter()
     }
 
+    /// Get well-known TCP service entries
     pub fn wellknown(&self) -> impl Iterator<Item = (&u16, &TcpServiceEntry)> {
         self.inner.iter().filter(|(_, e)| e.wellknown)
     }
 
+    /// Get common TCP service entries
     pub fn common(&self) -> impl Iterator<Item = (&u16, &TcpServiceEntry)> {
         self.inner.iter().filter(|(_, e)| e.common)
     }

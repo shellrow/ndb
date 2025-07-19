@@ -5,6 +5,7 @@ use rangemap::RangeInclusiveMap;
 
 pub use netdev::MacAddr;
 
+/// Represents a single OUI entry
 #[derive(Debug, Clone, PartialEq, Eq,Serialize, Deserialize)]
 pub struct OuiEntry {
     pub mac_prefix: String,
@@ -12,12 +13,14 @@ pub struct OuiEntry {
     pub vendor_detail: Option<String>,
 }
 
+/// Represents the OUI database
 pub struct OuiDb {
     inner: HashMap<String, OuiEntry>,
     inner_range: RangeInclusiveMap<u64, OuiEntry>,
 }
 
 impl OuiDb {
+    /// Create a new OUI database from a CSV reader
     pub fn from_csv<R: Read>(reader: R) -> Result<Self, csv::Error> {
         let mut rdr = csv::Reader::from_reader(reader);
         let mut map = HashMap::new();
@@ -38,16 +41,20 @@ impl OuiDb {
         }) 
     }
 
+    /// Create a new OUI database from a bundled CSV file
     #[cfg(feature = "bundled")]
     pub fn bundled() -> Self {
         static CSV_DATA: &str = include_str!("../data/oui.csv");
         Self::from_csv(Cursor::new(CSV_DATA)).expect("Failed to load bundled oui.csv")
     }
 
+    /// Get an OUI entry by its MAC prefix.
+    /// Use `lookup` or `lookup_mac` for more flexible lookups
     pub fn get(&self, prefix: &str) -> Option<&OuiEntry> {
         self.inner.get(prefix)
     }
 
+    /// Get all OUI entries as an iterator
     pub fn all(&self) -> impl Iterator<Item = (&String, &OuiEntry)> {
         self.inner.iter()
     }
