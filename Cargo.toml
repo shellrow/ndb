@@ -10,7 +10,7 @@ members = [
 [workspace.package]
 version = "0.1.0"
 edition = "2021"
-authors = ["shellrow <shellrow@fortnium.com>"]
+authors = ["shellrow <shellrow@foctal.com>"]
 
 [workspace.dependencies]
 ndb-core = { path = "ndb-core" }
