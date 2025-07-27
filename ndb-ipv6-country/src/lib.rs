@@ -1,7 +1,7 @@
-use std::{io::Read, net::Ipv6Addr};
-use serde::{Deserialize, Serialize};
-use rangemap::RangeInclusiveMap;
 use anyhow::Result;
+use rangemap::RangeInclusiveMap;
+use serde::{Deserialize, Serialize};
+use std::{io::Read, net::Ipv6Addr};
 
 pub const CSV_NAME: &str = "ipv6-country.csv";
 pub const BIN_NAME: &str = "ipv6-country.bin";
@@ -27,18 +27,24 @@ impl Ipv6CountryDb {
             let entry = result?;
             range_map.insert(entry.ip_from..=entry.ip_to, entry.country_code);
         }
-        Ok(Self { inner_range: range_map })
+        Ok(Self {
+            inner_range: range_map,
+        })
     }
 
     /// Create a new IPv6 Country database from a vector of entries
     pub fn from_entries(entries: Vec<Ipv6CountryEntry>) -> Self {
-        let inner_range = entries.into_iter().map(|entry| (entry.ip_from..=entry.ip_to, entry.country_code)).collect();
+        let inner_range = entries
+            .into_iter()
+            .map(|entry| (entry.ip_from..=entry.ip_to, entry.country_code))
+            .collect();
         Self { inner_range }
     }
 
     /// Create a new IPv6 Country database from a binary slice
     fn from_slice(slice: &[u8]) -> Result<Self> {
-        let (entries, _): (Vec<Ipv6CountryEntry>, _) = bincode::serde::decode_from_slice(slice, bincode::config::standard())?;
+        let (entries, _): (Vec<Ipv6CountryEntry>, _) =
+            bincode::serde::decode_from_slice(slice, bincode::config::standard())?;
         Ok(Self::from_entries(entries))
     }
 
@@ -62,20 +68,19 @@ impl Ipv6CountryDb {
 
     /// Get all country entries as an iterator
     pub fn all(&self) -> impl Iterator<Item = Ipv6CountryEntry> + '_ {
-        self.inner_range.iter().map(|(range, code)| {
-            Ipv6CountryEntry {
+        self.inner_range
+            .iter()
+            .map(|(range, code)| Ipv6CountryEntry {
                 ip_from: *range.start(),
                 ip_to: *range.end(),
                 country_code: code.clone(),
-            }
-        })
+            })
     }
 
     /// Get all entries as a vector
     pub fn entries(&self) -> Vec<Ipv6CountryEntry> {
         self.all().collect()
     }
-
 }
 
 #[cfg(test)]

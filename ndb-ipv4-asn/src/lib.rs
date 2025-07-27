@@ -1,7 +1,7 @@
-use std::{io::Read, net::Ipv4Addr};
-use serde::{Deserialize, Serialize};
-use rangemap::RangeInclusiveMap;
 use anyhow::Result;
+use rangemap::RangeInclusiveMap;
+use serde::{Deserialize, Serialize};
+use std::{io::Read, net::Ipv4Addr};
 
 pub const CSV_NAME: &str = "ipv4-asn.csv";
 pub const BIN_NAME: &str = "ipv4-asn.bin";
@@ -27,18 +27,24 @@ impl Ipv4AsnDb {
             let entry = result?;
             range_map.insert(entry.ip_from..=entry.ip_to, entry.asn);
         }
-        Ok(Self { inner_range: range_map })
+        Ok(Self {
+            inner_range: range_map,
+        })
     }
 
     /// Create a new IPv4 ASN database from a vector of entries
     pub fn from_entries(entries: Vec<Ipv4AsnEntry>) -> Self {
-        let inner_range = entries.into_iter().map(|entry| (entry.ip_from..=entry.ip_to, entry.asn)).collect();
+        let inner_range = entries
+            .into_iter()
+            .map(|entry| (entry.ip_from..=entry.ip_to, entry.asn))
+            .collect();
         Self { inner_range }
     }
 
     /// Create a new IPv4 ASN database from a binary slice
     fn from_slice(slice: &[u8]) -> Result<Self> {
-        let (entries, _): (Vec<Ipv4AsnEntry>, _) = bincode::serde::decode_from_slice(slice, bincode::config::standard())?;
+        let (entries, _): (Vec<Ipv4AsnEntry>, _) =
+            bincode::serde::decode_from_slice(slice, bincode::config::standard())?;
         Ok(Self::from_entries(entries))
     }
 
@@ -62,12 +68,10 @@ impl Ipv4AsnDb {
 
     /// Get all ASN entries as an iterator
     pub fn all(&self) -> impl Iterator<Item = Ipv4AsnEntry> + '_ {
-        self.inner_range.iter().map(|(range, asn)| {
-            Ipv4AsnEntry {
-                ip_from: *range.start(),
-                ip_to: *range.end(),
-                asn: *asn,
-            }
+        self.inner_range.iter().map(|(range, asn)| Ipv4AsnEntry {
+            ip_from: *range.start(),
+            ip_to: *range.end(),
+            asn: *asn,
         })
     }
 
@@ -86,12 +90,12 @@ mod tests {
         let entries = vec![
             Ipv4AsnEntry {
                 ip_from: 167772160, // 10.0.0.0
-                ip_to:   167772415, // 10.0.0.255
+                ip_to: 167772415,   // 10.0.0.255
                 asn: 64500,
             },
             Ipv4AsnEntry {
                 ip_from: 3232235520, // 192.168.0.0
-                ip_to:   3232235775, // 192.168.0.255
+                ip_to: 3232235775,   // 192.168.0.255
                 asn: 64501,
             },
         ];
@@ -114,8 +118,16 @@ mod tests {
     #[test]
     fn test_ipv4_asn_entries_roundtrip() {
         let entries = vec![
-            Ipv4AsnEntry { ip_from: 100, ip_to: 200, asn: 1000 },
-            Ipv4AsnEntry { ip_from: 300, ip_to: 400, asn: 2000 },
+            Ipv4AsnEntry {
+                ip_from: 100,
+                ip_to: 200,
+                asn: 1000,
+            },
+            Ipv4AsnEntry {
+                ip_from: 300,
+                ip_to: 400,
+                asn: 2000,
+            },
         ];
         let db = Ipv4AsnDb::from_entries(entries.clone());
         let out_entries = db.entries();

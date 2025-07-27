@@ -1,7 +1,7 @@
-use std::{io::Read, net::Ipv6Addr};
-use serde::{Deserialize, Serialize};
-use rangemap::RangeInclusiveMap;
 use anyhow::Result;
+use rangemap::RangeInclusiveMap;
+use serde::{Deserialize, Serialize};
+use std::{io::Read, net::Ipv6Addr};
 
 pub const CSV_NAME: &str = "ipv6-asn.csv";
 pub const BIN_NAME: &str = "ipv6-asn.bin";
@@ -27,18 +27,24 @@ impl Ipv6AsnDb {
             let entry = result?;
             range_map.insert(entry.ip_from..=entry.ip_to, entry.asn);
         }
-        Ok(Self { inner_range: range_map })
+        Ok(Self {
+            inner_range: range_map,
+        })
     }
 
     /// Create a new IPv6 ASN database from a vector of entries
     pub fn from_entries(entries: Vec<Ipv6AsnEntry>) -> Self {
-        let inner_range = entries.into_iter().map(|entry| (entry.ip_from..=entry.ip_to, entry.asn)).collect();
+        let inner_range = entries
+            .into_iter()
+            .map(|entry| (entry.ip_from..=entry.ip_to, entry.asn))
+            .collect();
         Self { inner_range }
     }
 
     /// Create a new IPv6 ASN database from a binary slice
     fn from_slice(slice: &[u8]) -> Result<Self> {
-        let (entries, _): (Vec<Ipv6AsnEntry>, _) = bincode::serde::decode_from_slice(slice, bincode::config::standard())?;
+        let (entries, _): (Vec<Ipv6AsnEntry>, _) =
+            bincode::serde::decode_from_slice(slice, bincode::config::standard())?;
         Ok(Self::from_entries(entries))
     }
 
@@ -62,12 +68,10 @@ impl Ipv6AsnDb {
 
     /// Get all ASN entries as an iterator
     pub fn all(&self) -> impl Iterator<Item = Ipv6AsnEntry> + '_ {
-        self.inner_range.iter().map(|(range, asn)| {
-            Ipv6AsnEntry {
-                ip_from: *range.start(),
-                ip_to: *range.end(),
-                asn: *asn,
-            }
+        self.inner_range.iter().map(|(range, asn)| Ipv6AsnEntry {
+            ip_from: *range.start(),
+            ip_to: *range.end(),
+            asn: *asn,
         })
     }
 
@@ -88,7 +92,10 @@ mod tests {
         // Example IPv6 address for Cloudflare
         let ip = "2606:4700:4700::1111".parse::<Ipv6Addr>().unwrap();
         let result = db.lookup(ip);
-        assert!(result.is_some(), "Expected to find ASN for Cloudflare IPv6 address");
+        assert!(
+            result.is_some(),
+            "Expected to find ASN for Cloudflare IPv6 address"
+        );
 
         // IPv6 Documentation Prefix (RFC 3849)
         let doc_ip = "2001:db8::1".parse::<Ipv6Addr>().unwrap();

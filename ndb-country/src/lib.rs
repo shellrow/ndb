@@ -1,7 +1,7 @@
+use anyhow::Result;
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::io::Read;
-use serde::{Deserialize, Serialize};
-use anyhow::Result;
 
 pub const CSV_NAME: &str = "country.csv";
 pub const BIN_NAME: &str = "country.bin";
@@ -31,13 +31,17 @@ impl CountryDb {
 
     /// Create a new Country database from a vector of entries
     pub fn from_entries(entries: Vec<CountryEntry>) -> Self {
-        let inner = entries.into_iter().map(|entry| (entry.code, entry.name)).collect();
+        let inner = entries
+            .into_iter()
+            .map(|entry| (entry.code, entry.name))
+            .collect();
         Self { inner }
     }
 
     /// Create a new Country database from a binary slice
     fn from_slice(slice: &[u8]) -> Result<Self> {
-        let (entries, _): (Vec<CountryEntry>, _) = bincode::serde::decode_from_slice(slice, bincode::config::standard())?;
+        let (entries, _): (Vec<CountryEntry>, _) =
+            bincode::serde::decode_from_slice(slice, bincode::config::standard())?;
         Ok(Self::from_entries(entries))
     }
 
@@ -57,7 +61,13 @@ impl CountryDb {
     }
 
     pub fn entries(&self) -> Vec<CountryEntry> {
-        self.inner.iter().map(|(code, name)| CountryEntry { code: code.clone(), name: name.clone() }).collect()
+        self.inner
+            .iter()
+            .map(|(code, name)| CountryEntry {
+                code: code.clone(),
+                name: name.clone(),
+            })
+            .collect()
     }
 }
 
@@ -68,8 +78,14 @@ mod tests {
     #[test]
     fn test_country_from_entries_and_lookup() {
         let entries = vec![
-            CountryEntry { code: "JP".into(), name: "Japan".into() },
-            CountryEntry { code: "US".into(), name: "United States".into() },
+            CountryEntry {
+                code: "JP".into(),
+                name: "Japan".into(),
+            },
+            CountryEntry {
+                code: "US".into(),
+                name: "United States".into(),
+            },
         ];
 
         let db = CountryDb::from_entries(entries);
@@ -82,8 +98,14 @@ mod tests {
     #[test]
     fn test_country_entries_roundtrip() {
         let entries = vec![
-            CountryEntry { code: "FR".into(), name: "France".into() },
-            CountryEntry { code: "DE".into(), name: "Germany".into() },
+            CountryEntry {
+                code: "FR".into(),
+                name: "France".into(),
+            },
+            CountryEntry {
+                code: "DE".into(),
+                name: "Germany".into(),
+            },
         ];
 
         let db = CountryDb::from_entries(entries.clone());

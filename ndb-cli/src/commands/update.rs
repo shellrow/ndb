@@ -1,7 +1,7 @@
+use crate::commands::AppConfig;
 use anyhow::Result;
 use std::fs::{self, File};
 use std::path::PathBuf;
-use crate::commands::AppConfig;
 
 pub fn update_bin_db(config: AppConfig) -> Result<()> {
     // Enumrate through the input directory and process files
@@ -117,7 +117,11 @@ pub fn update_bin_db(config: AppConfig) -> Result<()> {
 pub fn save_bin<T: serde::Serialize>(value: T, file_path: PathBuf, dry_run: bool) -> Result<()> {
     if dry_run {
         let size = bincode::serde::encode_to_vec(&value, bincode::config::standard())?.len();
-        tracing::info!("[dry-run] Would serialize {} bytes to {}", size, file_path.display());
+        tracing::info!(
+            "[dry-run] Would serialize {} bytes to {}",
+            size,
+            file_path.display()
+        );
         return Ok(());
     }
     if file_path.exists() {
@@ -131,9 +135,7 @@ pub fn save_bin<T: serde::Serialize>(value: T, file_path: PathBuf, dry_run: bool
             tracing::debug!("Serialized {} bytes to {}", size, file_path.display());
             tracing::debug!("File size: {} bytes", file_metadata.len());
             Ok(())
-        },
-        Err(e) => {
-            Err(anyhow::anyhow!("Failed to serialize data: {}", e))
-        },
+        }
+        Err(e) => Err(anyhow::anyhow!("Failed to serialize data: {}", e)),
     }
 }

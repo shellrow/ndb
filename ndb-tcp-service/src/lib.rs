@@ -1,8 +1,8 @@
+use anyhow::Result;
+use ndb_core::utils::serde::de_u8_to_bool;
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::io::Read;
-use serde::{Deserialize, Serialize};
-use ndb_core::utils::serde::de_u8_to_bool;
-use anyhow::Result;
 
 pub const CSV_NAME: &str = "tcp-services.csv";
 pub const BIN_NAME: &str = "tcp-services.bin";
@@ -37,13 +37,17 @@ impl TcpServiceDb {
     }
 
     pub fn from_entries(entries: Vec<TcpServiceEntry>) -> Self {
-        let inner = entries.into_iter().map(|entry| (entry.port, entry)).collect();
+        let inner = entries
+            .into_iter()
+            .map(|entry| (entry.port, entry))
+            .collect();
         Self { inner }
     }
 
     /// Create a new TCP service database from a binary slice
     pub fn from_slice(slice: &[u8]) -> Result<Self> {
-        let (entries, _): (Vec<TcpServiceEntry>, _) = bincode::serde::decode_from_slice(slice, bincode::config::standard())?;
+        let (entries, _): (Vec<TcpServiceEntry>, _) =
+            bincode::serde::decode_from_slice(slice, bincode::config::standard())?;
         Ok(Self::from_entries(entries))
     }
 
@@ -63,7 +67,7 @@ impl TcpServiceDb {
     pub fn get(&self, port: u16) -> Option<&TcpServiceEntry> {
         self.inner.get(&port)
     }
-    
+
     /// Get all TCP service entries as an iterator
     pub fn all(&self) -> impl Iterator<Item = (&u16, &TcpServiceEntry)> {
         self.inner.iter()

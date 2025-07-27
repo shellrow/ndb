@@ -1,8 +1,8 @@
+use anyhow::Result;
+use ndb_core::utils::serde::de_u8_to_bool;
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::io::Read;
-use serde::{Deserialize, Serialize};
-use ndb_core::utils::serde::de_u8_to_bool;
-use anyhow::Result;
 
 pub const CSV_NAME: &str = "udp-services.csv";
 pub const BIN_NAME: &str = "udp-services.bin";
@@ -37,13 +37,17 @@ impl UdpServiceDb {
     }
 
     pub fn from_entries(entries: Vec<UdpServiceEntry>) -> Self {
-        let inner = entries.into_iter().map(|entry| (entry.port, entry)).collect();
+        let inner = entries
+            .into_iter()
+            .map(|entry| (entry.port, entry))
+            .collect();
         Self { inner }
     }
 
     /// Create a new UDP service database from a binary slice
     pub fn from_slice(slice: &[u8]) -> Result<Self> {
-        let (entries, _): (Vec<UdpServiceEntry>, _) = bincode::serde::decode_from_slice(slice, bincode::config::standard())?;
+        let (entries, _): (Vec<UdpServiceEntry>, _) =
+            bincode::serde::decode_from_slice(slice, bincode::config::standard())?;
         Ok(Self::from_entries(entries))
     }
 
@@ -73,7 +77,7 @@ impl UdpServiceDb {
     pub fn wellknown(&self) -> impl Iterator<Item = (&u16, &UdpServiceEntry)> {
         self.inner.iter().filter(|(_, e)| e.wellknown)
     }
-    
+
     /// Get common UDP service entries
     pub fn common(&self) -> impl Iterator<Item = (&u16, &UdpServiceEntry)> {
         self.inner.iter().filter(|(_, e)| e.common)

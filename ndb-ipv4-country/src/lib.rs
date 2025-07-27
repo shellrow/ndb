@@ -1,7 +1,7 @@
+use anyhow::Result;
+use rangemap::RangeInclusiveMap;
 use serde::{Deserialize, Serialize};
 use std::{io::Read, net::Ipv4Addr};
-use rangemap::RangeInclusiveMap;
-use anyhow::Result;
 
 pub const CSV_NAME: &str = "ipv4-country.csv";
 pub const BIN_NAME: &str = "ipv4-country.bin";
@@ -27,18 +27,24 @@ impl Ipv4CountryDb {
             let entry = result?;
             range_map.insert(entry.ip_from..=entry.ip_to, entry.country_code);
         }
-        Ok(Self { inner_range: range_map })
+        Ok(Self {
+            inner_range: range_map,
+        })
     }
 
     /// Create a new IPv4 Country database from a vector of entries
     pub fn from_entries(entries: Vec<Ipv4CountryEntry>) -> Self {
-        let inner_range = entries.into_iter().map(|entry| (entry.ip_from..=entry.ip_to, entry.country_code)).collect();
+        let inner_range = entries
+            .into_iter()
+            .map(|entry| (entry.ip_from..=entry.ip_to, entry.country_code))
+            .collect();
         Self { inner_range }
     }
 
     /// Create a new IPv4 Country database from a binary slice
     fn from_slice(slice: &[u8]) -> Result<Self> {
-        let (entries, _): (Vec<Ipv4CountryEntry>, _) = bincode::serde::decode_from_slice(slice, bincode::config::standard())?;
+        let (entries, _): (Vec<Ipv4CountryEntry>, _) =
+            bincode::serde::decode_from_slice(slice, bincode::config::standard())?;
         Ok(Self::from_entries(entries))
     }
 
@@ -62,13 +68,13 @@ impl Ipv4CountryDb {
 
     /// Get all country entries as an iterator
     pub fn all(&self) -> impl Iterator<Item = Ipv4CountryEntry> + '_ {
-        self.inner_range.iter().map(|(range, code)| {
-            Ipv4CountryEntry {
+        self.inner_range
+            .iter()
+            .map(|(range, code)| Ipv4CountryEntry {
                 ip_from: *range.start(),
                 ip_to: *range.end(),
                 country_code: code.clone(),
-            }
-        })
+            })
     }
 
     /// Get all entries as a vector
@@ -90,7 +96,7 @@ mod tests {
 
         let test_ip = Ipv4Addr::new(203, 0, 113, 1);
         let test_result = db.lookup(test_ip);
-        
+
         assert!(test_result.is_none() || test_result.is_some());
     }
 

@@ -1,8 +1,8 @@
+use anyhow::Result;
+use rangemap::RangeInclusiveMap;
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::io::Read;
-use serde::{Deserialize, Serialize};
-use rangemap::RangeInclusiveMap;
-use anyhow::Result;
 
 pub use netdev::MacAddr;
 
@@ -10,7 +10,7 @@ pub const CSV_NAME: &str = "oui.csv";
 pub const BIN_NAME: &str = "oui.bin";
 
 /// Represents a single OUI entry
-#[derive(Debug, Clone, PartialEq, Eq,Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct OuiEntry {
     pub mac_prefix: String,
     pub vendor: String,
@@ -39,10 +39,10 @@ impl OuiDb {
                 map.insert(entry.mac_prefix.clone(), entry);
             }
         }
-        Ok(Self { 
+        Ok(Self {
             inner: map,
-            inner_range: range_map, 
-        }) 
+            inner_range: range_map,
+        })
     }
 
     /// Create a new OUI database from a vector of entries
@@ -63,7 +63,8 @@ impl OuiDb {
 
     /// Create a new OUI database from a binary slice
     fn from_slice(slice: &[u8]) -> Result<Self> {
-        let (entries, _): (Vec<OuiEntry>, _) = bincode::serde::decode_from_slice(slice, bincode::config::standard())?;
+        let (entries, _): (Vec<OuiEntry>, _) =
+            bincode::serde::decode_from_slice(slice, bincode::config::standard())?;
         Ok(Self::from_entries(entries))
     }
 
@@ -110,7 +111,6 @@ impl OuiDb {
     pub fn entries(&self) -> Vec<OuiEntry> {
         self.inner.values().cloned().collect()
     }
-
 }
 
 fn parse_mac_prefix_cidr(s: &str) -> Option<([u8; 6], u8)> {
@@ -178,5 +178,4 @@ mod tests {
         let entry = db.lookup("ac:4a:56:12:34:56");
         assert!(entry.is_some());
     }
-
 }

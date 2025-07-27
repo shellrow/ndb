@@ -2,10 +2,10 @@ mod commands;
 
 use std::path::PathBuf;
 
+use anyhow::Result;
 use clap::{crate_description, crate_name, crate_version, value_parser};
 use clap::{Arg, ArgMatches, Command};
 use commands::AppCommands;
-use anyhow::Result;
 use tracing::Level;
 use tracing_subscriber::fmt::time::ChronoLocal;
 use tracing_subscriber::FmtSubscriber;
@@ -13,7 +13,7 @@ use tracing_subscriber::FmtSubscriber;
 fn main() -> Result<()> {
     // Parse command line arguments
     let args: ArgMatches = parse_args();
-    
+
     // Initialize logger
     let verbose = args.get_flag("verbose");
     init_logger(verbose);
@@ -35,11 +35,7 @@ fn main() -> Result<()> {
 }
 
 pub fn init_logger(verbose: bool) {
-    let level = if verbose {
-        Level::DEBUG
-    } else {
-        Level::INFO
-    };
+    let level = if verbose { Level::DEBUG } else { Level::INFO };
     // Init logger
     let subscriber = FmtSubscriber::builder()
         .with_max_level(level)
@@ -58,35 +54,37 @@ fn parse_args() -> ArgMatches {
                 .help("Run in verbose mode")
                 .long("verbose")
                 .num_args(0)
-                .required(false)
+                .required(false),
         )
         // Sub-command for update database.
-        .subcommand(Command::new("update")
-            .about("Update the bin database with the latest csv data")
-            .arg(
-                Arg::new("dry-run")
-                    .help("Run in dry-run mode, no changes will be made")
-                    .long("dry-run")
-                    .num_args(0)
-                    .required(false)
-            )
-            .arg(Arg::new("input-dir")
-                .help("Directory containing the latest CSV files")
-                .short('i')
-                .long("input-dir")
-                .value_name("dir_path")
-                .value_parser(value_parser!(PathBuf))
-                .required(true)
-            )
-            .arg(Arg::new("output-dir")
-                .help("Directory to output the updated BIN DB files")
-                .short('o')
-                .long("output-dir")
-                .value_name("dir_path")
-                .value_parser(value_parser!(PathBuf))
-                .required(true)
-            )
-        )
-        ;
+        .subcommand(
+            Command::new("update")
+                .about("Update the bin database with the latest csv data")
+                .arg(
+                    Arg::new("dry-run")
+                        .help("Run in dry-run mode, no changes will be made")
+                        .long("dry-run")
+                        .num_args(0)
+                        .required(false),
+                )
+                .arg(
+                    Arg::new("input-dir")
+                        .help("Directory containing the latest CSV files")
+                        .short('i')
+                        .long("input-dir")
+                        .value_name("dir_path")
+                        .value_parser(value_parser!(PathBuf))
+                        .required(true),
+                )
+                .arg(
+                    Arg::new("output-dir")
+                        .help("Directory to output the updated BIN DB files")
+                        .short('o')
+                        .long("output-dir")
+                        .value_name("dir_path")
+                        .value_parser(value_parser!(PathBuf))
+                        .required(true),
+                ),
+        );
     app.get_matches()
 }
