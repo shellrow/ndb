@@ -1,7 +1,11 @@
 use std::collections::HashMap;
-use std::io::{Cursor, Read};
+use std::io::Read;
 use serde::{Deserialize, Serialize};
 use ndb_core::utils::serde::de_u8_to_bool;
+use anyhow::Result;
+
+pub const CSV_NAME: &str = "udp-services.csv";
+pub const BIN_NAME: &str = "udp-services.bin";
 
 /// Represents a single UDP service entry
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -32,11 +36,22 @@ impl UdpServiceDb {
         Ok(Self { inner: map })
     }
 
+    pub fn from_entries(entries: Vec<UdpServiceEntry>) -> Self {
+        let inner = entries.into_iter().map(|entry| (entry.port, entry)).collect();
+        Self { inner }
+    }
+
+    /// Create a new UDP service database from a binary slice
+    pub fn from_slice(slice: &[u8]) -> Result<Self> {
+        let (entries, _): (Vec<UdpServiceEntry>, _) = bincode::serde::decode_from_slice(slice, bincode::config::standard())?;
+        Ok(Self::from_entries(entries))
+    }
+
     /// Load embedded (bundled) database
     #[cfg(feature = "bundled")]
     pub fn bundled() -> Self {
-        static CSV_DATA: &str = include_str!("../data/udp-services.csv");
-        Self::from_csv(Cursor::new(CSV_DATA)).expect("Failed to load bundled udp-services.csv")
+        static BIN_DATA: &[u8] = include_bytes!("../data/udp-services.bin");
+        Self::from_slice(BIN_DATA).expect("Failed to load bundled udp-services.bin")
     }
 
     /// Lookup a UDP service name by port
@@ -62,6 +77,11 @@ impl UdpServiceDb {
     /// Get common UDP service entries
     pub fn common(&self) -> impl Iterator<Item = (&u16, &UdpServiceEntry)> {
         self.inner.iter().filter(|(_, e)| e.common)
+    }
+
+    /// Get all UDP service entries as a vector
+    pub fn entries(&self) -> Vec<UdpServiceEntry> {
+        self.inner.values().cloned().collect()
     }
 }
 

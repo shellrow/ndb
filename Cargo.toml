@@ -1,7 +1,14 @@
 [workspace]
 resolver = "2"
 members = [ 
-    "ndb-core",
+    "ndb-as", 
+    "ndb-cli", 
+    "ndb-core", 
+    "ndb-country", 
+    "ndb-ipv4-asn", 
+    "ndb-ipv4-country", 
+    "ndb-ipv6-asn", 
+    "ndb-ipv6-country",
     "ndb-oui", 
     "ndb-tcp-service", 
     "ndb-udp-service", 
@@ -14,6 +21,17 @@ authors = ["shellrow <shellrow@foctal.com>"]
 
 [workspace.dependencies]
 ndb-core = { path = "ndb-core", version = "0.1.0" }
+ndb-as = { path = "ndb-as", version = "0.1.0" }
+ndb-country = { path = "ndb-country", version = "0.1.0" }
+ndb-oui = { path = "ndb-oui", version = "0.1.0" }
+ndb-tcp-service = { path = "ndb-tcp-service", version = "0.1.0" }
+ndb-udp-service = { path = "ndb-udp-service", version = "0.1.0" }
+ndb-ipv4-asn = { path = "ndb-ipv4-asn", version = "0.1.0" }
+ndb-ipv4-country = { path = "ndb-ipv4-country", version = "0.1.0" }
+ndb-ipv6-asn = { path = "ndb-ipv6-asn", version = "0.1.0" }
+ndb-ipv6-country = { path = "ndb-ipv6-country", version = "0.1.0" }
+anyhow = { version = "1" }
 serde = { version = "1" }
 csv = { version = "1" }
+bincode = { version = "2" }
 criterion = { version = "0.5" }

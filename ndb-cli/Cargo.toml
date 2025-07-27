@@ -1,0 +1,28 @@
+[package]
+name = "ndb-cli"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+description = "CLI tool for the ndb project."
+repository = "https://github.com/shellrow/ndb"
+homepage = "https://github.com/shellrow/ndb"
+documentation = "https://github.com/shellrow/ndb"
+readme = "README.md"
+license = "MIT"
+
+[dependencies]
+anyhow = { version = "1" }
+clap = { version = "4.5", features = ["cargo"] }
+tracing = { version = "0.1" }
+tracing-subscriber = { version = "0.3", features = ["time", "chrono"] }
+ndb-as = { workspace = true }
+ndb-country = { workspace = true }
+ndb-oui = { workspace = true }
+ndb-tcp-service = { workspace = true }
+ndb-udp-service = { workspace = true }
+ndb-ipv4-asn = { workspace = true }
+ndb-ipv4-country = { workspace = true }
+ndb-ipv6-asn = { workspace = true }
+ndb-ipv6-country = { workspace = true }
+serde = { workspace = true, features = ["derive"] }
+bincode = { workspace = true, features = ["serde"] }

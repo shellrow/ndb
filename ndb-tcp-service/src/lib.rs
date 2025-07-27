@@ -1,7 +1,11 @@
 use std::collections::HashMap;
-use std::io::{Cursor, Read};
+use std::io::Read;
 use serde::{Deserialize, Serialize};
 use ndb_core::utils::serde::de_u8_to_bool;
+use anyhow::Result;
+
+pub const CSV_NAME: &str = "tcp-services.csv";
+pub const BIN_NAME: &str = "tcp-services.bin";
 
 /// Represents a single TCP service entry
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -32,11 +36,22 @@ impl TcpServiceDb {
         Ok(Self { inner: map })
     }
 
+    pub fn from_entries(entries: Vec<TcpServiceEntry>) -> Self {
+        let inner = entries.into_iter().map(|entry| (entry.port, entry)).collect();
+        Self { inner }
+    }
+
+    /// Create a new TCP service database from a binary slice
+    pub fn from_slice(slice: &[u8]) -> Result<Self> {
+        let (entries, _): (Vec<TcpServiceEntry>, _) = bincode::serde::decode_from_slice(slice, bincode::config::standard())?;
+        Ok(Self::from_entries(entries))
+    }
+
     /// Load embedded (bundled) database
     #[cfg(feature = "bundled")]
     pub fn bundled() -> Self {
-        static CSV_DATA: &str = include_str!("../data/tcp-services.csv");
-        Self::from_csv(Cursor::new(CSV_DATA)).expect("Failed to load bundled tcp-services.csv")
+        static BIN_DATA: &[u8] = include_bytes!("../data/tcp-services.bin");
+        Self::from_slice(BIN_DATA).expect("Failed to load bundled tcp-services.bin")
     }
 
     /// Lookup a TCP service name by port
@@ -62,6 +77,11 @@ impl TcpServiceDb {
     /// Get common TCP service entries
     pub fn common(&self) -> impl Iterator<Item = (&u16, &TcpServiceEntry)> {
         self.inner.iter().filter(|(_, e)| e.common)
+    }
+
+    /// Get all TCP service entries as a vector
+    pub fn entries(&self) -> Vec<TcpServiceEntry> {
+        self.inner.values().cloned().collect()
     }
 }
 

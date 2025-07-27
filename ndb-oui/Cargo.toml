@@ -13,6 +13,8 @@ serde = { workspace = true, features = ["derive"] }
 csv = { workspace = true }
 rangemap = { version = "1.5" }
 netdev = { version = "0.36", default-features = false, features = [] }
+bincode = { workspace = true, features = ["serde"] }
+anyhow = { workspace = true }
 
 [dev-dependencies]
 criterion = { workspace = true }
