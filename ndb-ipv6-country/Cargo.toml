@@ -1,0 +1,27 @@
+[package]
+name = "ndb-ipv6-country"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+description = "IPv6 country database with lookup interface."
+repository = "https://github.com/shellrow/ndb"
+readme = "README.md"
+license = "MIT"
+
+[dependencies]
+serde = { workspace = true, features = ["derive"] }
+csv = { workspace = true }
+rangemap = { version = "1.5" }
+bincode = { workspace = true, features = ["serde"] }
+anyhow = { workspace = true }
+
+[dev-dependencies]
+criterion = { workspace = true }
+
+[features]
+default = ["bundled"]
+bundled = []
+
+[[bench]]
+name = "ipv6_country_lookup"
+harness = false

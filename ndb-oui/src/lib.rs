@@ -1,12 +1,16 @@
-use std::collections::HashMap;
-use std::io::{Cursor, Read};
-use serde::{Deserialize, Serialize};
+use anyhow::Result;
 use rangemap::RangeInclusiveMap;
+use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
+use std::io::Read;
 
 pub use netdev::MacAddr;
 
+pub const CSV_NAME: &str = "oui.csv";
+pub const BIN_NAME: &str = "oui.bin";
+
 /// Represents a single OUI entry
-#[derive(Debug, Clone, PartialEq, Eq,Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct OuiEntry {
     pub mac_prefix: String,
     pub vendor: String,
@@ -35,17 +39,40 @@ impl OuiDb {
                 map.insert(entry.mac_prefix.clone(), entry);
             }
         }
-        Ok(Self { 
+        Ok(Self {
             inner: map,
-            inner_range: range_map, 
-        }) 
+            inner_range: range_map,
+        })
     }
 
-    /// Create a new OUI database from a bundled CSV file
+    /// Create a new OUI database from a vector of entries
+    pub fn from_entries(entries: Vec<OuiEntry>) -> Self {
+        let mut inner = HashMap::new();
+        let mut inner_range = RangeInclusiveMap::new();
+        for entry in entries {
+            if let Some((prefix, bits)) = parse_mac_prefix_cidr(&entry.mac_prefix) {
+                let start = mac_to_u64(prefix) & (!0u64 << (48 - bits));
+                let end = start | ((1u64 << (48 - bits)) - 1);
+                inner_range.insert(start..=end, entry.clone());
+            } else {
+                inner.insert(entry.mac_prefix.clone(), entry);
+            }
+        }
+        Self { inner, inner_range }
+    }
+
+    /// Create a new OUI database from a binary slice
+    fn from_slice(slice: &[u8]) -> Result<Self> {
+        let (entries, _): (Vec<OuiEntry>, _) =
+            bincode::serde::decode_from_slice(slice, bincode::config::standard())?;
+        Ok(Self::from_entries(entries))
+    }
+
+    /// Create a new OUI database from a bundled file
     #[cfg(feature = "bundled")]
     pub fn bundled() -> Self {
-        static CSV_DATA: &str = include_str!("../data/oui.csv");
-        Self::from_csv(Cursor::new(CSV_DATA)).expect("Failed to load bundled oui.csv")
+        static BIN_DATA: &[u8] = include_bytes!("../data/oui.bin");
+        Self::from_slice(BIN_DATA).expect("Failed to load bundled oui.bin")
     }
 
     /// Get an OUI entry by its MAC prefix.
@@ -78,6 +105,11 @@ impl OuiDb {
         // Exact match
         let key = format!("{:02X}:{:02X}:{:02X}", octets[0], octets[1], octets[2]);
         self.inner.get(&key)
+    }
+
+    /// Get all entries as a vector
+    pub fn entries(&self) -> Vec<OuiEntry> {
+        self.inner.values().cloned().collect()
     }
 }
 
@@ -146,5 +178,4 @@ mod tests {
         let entry = db.lookup("ac:4a:56:12:34:56");
         assert!(entry.is_some());
     }
-
 }
