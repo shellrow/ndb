@@ -89,11 +89,11 @@ impl OuiDb {
     /// Lookup from string MAC address (e.g., "ac:4a:56:12:34:56")
     pub fn lookup(&self, mac_str: &str) -> Option<&OuiEntry> {
         let mac = MacAddr::from_hex_format(mac_str);
-        self.lookup_mac(mac)
+        self.lookup_mac(&mac)
     }
 
     /// Lookup from `MacAddr` instance
-    pub fn lookup_mac(&self, mac: MacAddr) -> Option<&OuiEntry> {
+    pub fn lookup_mac(&self, mac: &MacAddr) -> Option<&OuiEntry> {
         let octets = mac.octets();
 
         // Range (CIDR) match
@@ -160,7 +160,7 @@ mod tests {
     fn test_lookup_mac_exact() {
         let db = OuiDb::bundled();
         let mac = MacAddr::from_hex_format("ac:4a:56:12:34:56");
-        let entry = db.lookup_mac(mac);
+        let entry = db.lookup_mac(&mac);
         assert!(entry.is_some());
     }
 
@@ -168,7 +168,7 @@ mod tests {
     fn test_lookup_mac_cidr() {
         let db = OuiDb::bundled();
         let mac = MacAddr::from_hex_format("fc:d2:b6:0a:00:00");
-        let entry = db.lookup_mac(mac);
+        let entry = db.lookup_mac(&mac);
         assert!(entry.is_some());
     }
 

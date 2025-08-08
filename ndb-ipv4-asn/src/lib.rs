@@ -61,8 +61,8 @@ impl Ipv4AsnDb {
     }
 
     /// Lookup ASN by IPv4 address
-    pub fn lookup(&self, ip: Ipv4Addr) -> Option<&u32> {
-        let ip_u32 = u32::from(ip);
+    pub fn lookup(&self, ip: &Ipv4Addr) -> Option<&u32> {
+        let ip_u32 = u32::from(*ip);
         self.inner_range.get(&ip_u32)
     }
 
@@ -104,15 +104,15 @@ mod tests {
 
         // 10.0.0.1
         let ip1 = Ipv4Addr::new(10, 0, 0, 1);
-        assert_eq!(db.lookup(ip1), Some(&64500));
+        assert_eq!(db.lookup(&ip1), Some(&64500));
 
         // 192.168.0.254
         let ip2 = Ipv4Addr::new(192, 168, 0, 254);
-        assert_eq!(db.lookup(ip2), Some(&64501));
+        assert_eq!(db.lookup(&ip2), Some(&64501));
 
         // 8.8.8.8 not in DB
         let ip3 = Ipv4Addr::new(8, 8, 8, 8);
-        assert_eq!(db.lookup(ip3), None);
+        assert_eq!(db.lookup(&ip3), None);
     }
 
     #[test]

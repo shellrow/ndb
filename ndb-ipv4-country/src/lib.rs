@@ -61,8 +61,8 @@ impl Ipv4CountryDb {
     }
 
     /// Lookup country code by IPv4 address
-    pub fn lookup(&self, ip: Ipv4Addr) -> Option<&String> {
-        let ip_u32 = u32::from(ip);
+    pub fn lookup(&self, ip: &Ipv4Addr) -> Option<&String> {
+        let ip_u32 = u32::from(*ip);
         self.inner_range.get(&ip_u32)
     }
 
@@ -91,11 +91,11 @@ mod tests {
         let db = Ipv4CountryDb::bundled();
 
         let ip = Ipv4Addr::new(8, 8, 8, 8); // Google DNS
-        let result = db.lookup(ip);
+        let result = db.lookup(&ip);
         assert!(result.is_some(), "Expected to find a country for 8.8.8.8");
 
         let test_ip = Ipv4Addr::new(203, 0, 113, 1);
-        let test_result = db.lookup(test_ip);
+        let test_result = db.lookup(&test_ip);
 
         assert!(test_result.is_none() || test_result.is_some());
     }

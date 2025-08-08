@@ -61,8 +61,8 @@ impl Ipv6CountryDb {
     }
 
     /// Lookup country code by IPv6 address
-    pub fn lookup(&self, ip: Ipv6Addr) -> Option<&String> {
-        let ip_u128 = u128::from(ip);
+    pub fn lookup(&self, ip: &Ipv6Addr) -> Option<&String> {
+        let ip_u128 = u128::from(*ip);
         self.inner_range.get(&ip_u128)
     }
 
@@ -109,7 +109,7 @@ mod tests {
     fn test_ipv6_country_lookup_str() {
         let db = Ipv6CountryDb::bundled();
         let sample_ip: Ipv6Addr = "::1".parse().unwrap(); // loopback
-        let result = db.lookup(sample_ip);
+        let result = db.lookup(&sample_ip);
         println!("Lookup ::1 => {:?}", result);
     }
 }

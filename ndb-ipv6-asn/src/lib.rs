@@ -61,8 +61,8 @@ impl Ipv6AsnDb {
     }
 
     /// Lookup ASN by IPv6 address
-    pub fn lookup(&self, ip: Ipv6Addr) -> Option<&u32> {
-        let ip_u128 = u128::from(ip);
+    pub fn lookup(&self, ip: &Ipv6Addr) -> Option<&u32> {
+        let ip_u128 = u128::from(*ip);
         self.inner_range.get(&ip_u128)
     }
 
@@ -91,7 +91,7 @@ mod tests {
 
         // Example IPv6 address for Cloudflare
         let ip = "2606:4700:4700::1111".parse::<Ipv6Addr>().unwrap();
-        let result = db.lookup(ip);
+        let result = db.lookup(&ip);
         assert!(
             result.is_some(),
             "Expected to find ASN for Cloudflare IPv6 address"
@@ -99,7 +99,7 @@ mod tests {
 
         // IPv6 Documentation Prefix (RFC 3849)
         let doc_ip = "2001:db8::1".parse::<Ipv6Addr>().unwrap();
-        let doc_result = db.lookup(doc_ip);
+        let doc_result = db.lookup(&doc_ip);
         assert!(doc_result.is_none() || doc_result.is_some());
     }
 }

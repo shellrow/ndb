@@ -16,7 +16,7 @@ fn bench_ipv6_country_lookup(c: &mut Criterion) {
     c.bench_function("ipv6_country_lookup_5", |b| {
         b.iter(|| {
             for ip in &ips {
-                let _ = db.lookup(*ip);
+                let _ = db.lookup(ip);
             }
         })
     });
