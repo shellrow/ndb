@@ -15,21 +15,21 @@ members = [
 ]
 
 [workspace.package]
-version = "0.2.0"
+version = "0.3.0"
 edition = "2021"
 authors = ["shellrow <shellrow@foctal.com>"]
 
 [workspace.dependencies]
-ndb-core = { path = "ndb-core", version = "0.2.0" }
-ndb-as = { path = "ndb-as", version = "0.2.0" }
-ndb-country = { path = "ndb-country", version = "0.2.0" }
-ndb-oui = { path = "ndb-oui", version = "0.2.0" }
-ndb-tcp-service = { path = "ndb-tcp-service", version = "0.2.0" }
-ndb-udp-service = { path = "ndb-udp-service", version = "0.2.0" }
-ndb-ipv4-asn = { path = "ndb-ipv4-asn", version = "0.2.0" }
-ndb-ipv4-country = { path = "ndb-ipv4-country", version = "0.2.0" }
-ndb-ipv6-asn = { path = "ndb-ipv6-asn", version = "0.2.0" }
-ndb-ipv6-country = { path = "ndb-ipv6-country", version = "0.2.0" }
+ndb-core = { path = "ndb-core", version = "0.3.0" }
+ndb-as = { path = "ndb-as", version = "0.3.0" }
+ndb-country = { path = "ndb-country", version = "0.3.0" }
+ndb-oui = { path = "ndb-oui", version = "0.3.0" }
+ndb-tcp-service = { path = "ndb-tcp-service", version = "0.3.0" }
+ndb-udp-service = { path = "ndb-udp-service", version = "0.3.0" }
+ndb-ipv4-asn = { path = "ndb-ipv4-asn", version = "0.3.0" }
+ndb-ipv4-country = { path = "ndb-ipv4-country", version = "0.3.0" }
+ndb-ipv6-asn = { path = "ndb-ipv6-asn", version = "0.3.0" }
+ndb-ipv6-country = { path = "ndb-ipv6-country", version = "0.3.0" }
 anyhow = { version = "1" }
 serde = { version = "1" }
 csv = { version = "1" }
