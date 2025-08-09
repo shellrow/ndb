@@ -12,7 +12,7 @@ license = "MIT"
 serde = { workspace = true, features = ["derive"] }
 csv = { workspace = true }
 rangemap = { version = "1.5" }
-netdev = { version = "0.36", default-features = false, features = [] }
+netdev = { version = "0.37", default-features = false, features = [] }
 bincode = { workspace = true, features = ["serde"] }
 anyhow = { workspace = true }
 

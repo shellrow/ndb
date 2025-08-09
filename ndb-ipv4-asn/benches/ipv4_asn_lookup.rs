@@ -15,7 +15,7 @@ fn bench_ipv4_asn_lookup(c: &mut Criterion) {
     c.bench_function("ipv4_asn_lookup_5_ips", |b| {
         b.iter(|| {
             for ip in &ips {
-                let _ = db.lookup(*ip);
+                let _ = db.lookup(ip);
             }
         })
     });
