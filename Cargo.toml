@@ -1,0 +1,24 @@
+[workspace]
+resolver = "2"
+members = [ 
+    "ndb-cli", 
+    "ndb-core", 
+    "ndb-oui", 
+    "ndb-tcp-service", 
+    "ndb-udp-service", 
+]
+
+[workspace.package]
+edition = "2021"
+authors = ["shellrow <shellrow@foctal.com>"]
+
+[workspace.dependencies]
+ndb-core = { path = "ndb-core", version = "0.4.0" }
+ndb-oui = { path = "ndb-oui", version = "0.4.1" }
+ndb-tcp-service = { path = "ndb-tcp-service", version = "0.4.0" }
+ndb-udp-service = { path = "ndb-udp-service", version = "0.4.0" }
+anyhow = { version = "1" }
+serde = { version = "1" }
+csv = { version = "1" }
+bincode = { version = "2" }
+criterion = { version = "0.5" }
